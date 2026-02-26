@@ -2,11 +2,14 @@
 import { Link } from '@inertiajs/vue3';
 import {
     LayoutGrid,
-    Milestone,
+    ShoppingCart,
+    ArrowLeftRight,
+    TrendingUp,
+    History,
+    MapPin,
+    User,
 } from 'lucide-vue-next';
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
 import {
     Sidebar,
     SidebarContent,
@@ -27,13 +30,36 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Stasiun',
-        href: '/admin/station',
-        icon: Milestone,
+        title: 'Pengambilan dari POO',
+        href: '/admin/pengambilan',
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Transfer UCO',
+        href: '/admin/transfer',
+        icon: ArrowLeftRight,
+    },
+    {
+        title: 'Penjualan / Export',
+        href: '/admin/penjualan',
+        icon: TrendingUp,
+    },
+    {
+        title: 'Riwayat Transaksi',
+        href: '/admin/riwayat',
+        icon: History,
+    },
+    {
+        title: 'Manajemen POO',
+        href: '/admin/manajemen-poo',
+        icon: MapPin,
+    },
+    {
+        title: 'Profil Akun',
+        href: '/admin/profil',
+        icon: User,
     },
 ];
-
-const footerNavItems: NavItem[] = [];
 </script>
 
 <template>
@@ -54,10 +80,7 @@ const footerNavItems: NavItem[] = [];
             <NavMain :items="mainNavItems" />
         </SidebarContent>
 
-        <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
-            <NavUser />
-        </SidebarFooter>
+        <SidebarFooter />
     </Sidebar>
     <slot />
 </template>
