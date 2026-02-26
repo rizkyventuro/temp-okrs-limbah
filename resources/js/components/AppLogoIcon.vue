@@ -14,7 +14,7 @@ defineProps<Props>();
 
 <template>
     <img
-        src="/assets/images/logo_airnav.png"
+        src="/assets/images/logo.png"
         alt="Logo"
         :class="className"
         v-bind="$attrs"

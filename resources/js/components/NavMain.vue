@@ -19,7 +19,7 @@ const { isCurrentUrl } = useCurrentUrl();
 
 <template>
     <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel class="text-xs font-semibold uppercase tracking-wider text-gray-400">
+        <SidebarGroupLabel class="text-xs font-semibold tracking-wider text-[#878787] p-0">
             Menu Utama
         </SidebarGroupLabel>
         <SidebarMenu>
@@ -29,7 +29,7 @@ const { isCurrentUrl } = useCurrentUrl();
                     :is-active="isCurrentUrl(item.href)"
                     :tooltip="item.title"
                     :style="isCurrentUrl(item.href)
-                        ? { '--sidebar-accent': '#0D9488', '--sidebar-accent-foreground': '#FFFFFF' }
+                        ? { '--sidebar-accent': '#EBF7FA', '--sidebar-accent-foreground': '#007C95' ,'--font-weight-medium':'600'}
                         : {}
                     "
                 >

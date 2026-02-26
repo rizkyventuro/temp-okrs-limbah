@@ -23,42 +23,24 @@ import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import AppLogo from './AppLogo.vue';
 
+import IconDashboard from '@/components/icons/menu/IconDashboard.vue';
+import IconPengambilan from '@/components/icons/menu/iconPengambilan.vue';
+import IconTransfer from '@/components/icons/menu/iconTransfer.vue';
+import IconPenjualan from '@/components/icons/menu/iconPenjualan.vue';
+import IconRiwayat from '@/components/icons/menu/iconRiwayatTransaksi.vue';
+import IconManajemen from '@/components/icons/menu/iconManajemen.vue';
+import IconProfil from '@/components/icons/menu/iconProfile.vue';
+
+
+
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Pengambilan dari POO',
-        href: '/admin/pengambilan',
-        icon: ShoppingCart,
-    },
-    {
-        title: 'Transfer UCO',
-        href: '/admin/transfer',
-        icon: ArrowLeftRight,
-    },
-    {
-        title: 'Penjualan / Export',
-        href: '/admin/penjualan',
-        icon: TrendingUp,
-    },
-    {
-        title: 'Riwayat Transaksi',
-        href: '/admin/riwayat',
-        icon: History,
-    },
-    {
-        title: 'Manajemen POO',
-        href: '/admin/manajemen-poo',
-        icon: MapPin,
-    },
-    {
-        title: 'Profil Akun',
-        href: '/admin/profil',
-        icon: User,
-    },
+    { title: 'Dashboard', href: dashboard(), icon: IconDashboard },
+    { title: 'Pengambilan dari POO', href: '/admin/pengambilan', icon: IconPengambilan },
+    { title: 'Transfer UCO', href: '/admin/transfer', icon: IconTransfer },
+    { title: 'Penjualan / Export', href: '/admin/penjualan', icon: IconPenjualan },
+    { title: 'Riwayat Transaksi', href: '/admin/riwayat', icon: IconRiwayat },
+    { title: 'Manajemen POO', href: '/admin/manajemen-poo', icon: IconManajemen },
+    { title: 'Profil Akun', href: '/admin/profil', icon: IconProfil },
 ];
 </script>
 
