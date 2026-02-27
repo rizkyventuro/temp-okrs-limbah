@@ -13,10 +13,10 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('admin/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('admin/pengambilan', [PengambilanPOOController::class, 'index'])->name('admin.pengambilan');
-    Route::post('admin/pengambilan', [PengambilanPOOController::class, 'store']);
-    Route::put('admin/pengambilan/{id}', [PengambilanPOOController::class, 'update']);
-    Route::delete('admin/pengambilan/{id}', [PengambilanPOOController::class, 'destroy']);
+    Route::get('admin/pengambilan-poo', [PengambilanPOOController::class, 'index'])->name('admin.pengambilan-poo');
+    Route::post('admin/pengambilan-poo', [PengambilanPOOController::class, 'store']);
+    Route::put('admin/pengambilan-poo/{id}', [PengambilanPOOController::class, 'update']);
+    Route::delete('admin/pengambilan-poo/{id}', [PengambilanPOOController::class, 'destroy']);
 
     Route::get('admin/transfer', [StationController::class, 'index'])->name('admin.transfer');
     Route::post('admin/transfer', [StationController::class, 'store']);

@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
     data-slot="button"
     :as="as"
     :as-child="asChild"
-    :class="cn(buttonVariants({ variant, size }), 'h-10.25 rounded-[14px]', props.class)"
+    :class="cn(buttonVariants({ variant, size }), 'h-10.25 rounded-core', props.class)"
   >
     <slot />
   </Primitive>

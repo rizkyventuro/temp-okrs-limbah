@@ -21,6 +21,8 @@
         'Noto Color Emoji';
 
 
+    --radius-core: 14px;
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
@@ -36,6 +38,7 @@
 
     --color-primary: var(--primary);
     --color-primary-hover: var(--primary-hover);
+    --color-primary-surface: var(--primary-surface);
     --color-primary-foreground: var(--primary-foreground);
 
     --color-secondary: var(--secondary);
@@ -109,6 +112,7 @@
     --popover-foreground: hsl(0 0% 3.9%);
     --primary: #007C95;
     --primary-hover: #046b7f;
+    --primary-surface: #EBF7FA;
     --primary-foreground: hsl(0 0% 98%);
     --secondary: hsl(0 0% 92.1%);
     --secondary-foreground: hsl(0 0% 9%);
