@@ -6,6 +6,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import BadgeBussines from '@/components/BadgeBussines.vue';
 import {
     Dialog,
     DialogContent,
@@ -31,7 +32,7 @@ const props = defineProps<{
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Pengambilan dari POO',
-        href: '/admin/pengambilan-poo',
+        href: '/poos',
     },
 ];
 
@@ -85,6 +86,11 @@ const openDelete = (poo: POO) => {
     isDeleteOpen.value = true;
 };
 
+
+const openBatches = (poo: POO) => {
+    router.visit(`/batches/${poo.id}/create`);
+};
+
 const setType = (type: 'Restoran' | 'UMKM' | 'Rumah Tangga') => {
     selectedType.value = type;
     form.type = type;
@@ -94,7 +100,7 @@ const handleSubmit = () => {
     form.type = selectedType.value;
 
     if (isEditing.value && editingPoo.value) {
-        form.put(`/admin/pengambilan-poo/${editingPoo.value.id}`, {
+        form.put(`/poos/${editingPoo.value.id}`, {
             onSuccess: () => {
                 isFormOpen.value = false;
                 editingPoo.value = null;
@@ -110,7 +116,7 @@ const handleSubmit = () => {
             },
         });
     } else {
-        form.post('/admin/pengambilan-poo', {
+        form.post('/poos/', {
             onSuccess: () => {
                 isFormOpen.value = false;
                 form.reset();
@@ -130,7 +136,7 @@ const handleSubmit = () => {
 const handleDelete = () => {
     if (!deletingPoo.value) return;
 
-    router.delete(`/admin/pengambilan-poo/${deletingPoo.value.id}`, {
+    router.delete(`/poos/${deletingPoo.value.id}`, {
         onSuccess: () => {
             isDeleteOpen.value = false;
             deletingPoo.value = null;
@@ -146,31 +152,6 @@ const handleDelete = () => {
     });
 };
 
-const getTypeColor = (type: string) => {
-    switch (type) {
-        case 'Restoran':
-            return 'bg-orange-100 text-orange-600';
-        case 'UMKM':
-            return 'bg-blue-100 text-blue-600';
-        case 'Rumah Tangga':
-            return 'bg-green-100 text-green-600';
-        default:
-            return 'bg-gray-100 text-gray-600';
-    }
-};
-
-const getTypeIcon = (type: string) => {
-    switch (type) {
-        case 'Restoran':
-            return UtensilsCrossed;
-        case 'UMKM':
-            return Store;
-        case 'Rumah Tangga':
-            return Home;
-        default:
-            return Store;
-    }
-};
 </script>
 
 <template>
@@ -236,11 +217,7 @@ const getTypeIcon = (type: string) => {
                         class="group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-teal-300 hover:shadow-md">
                         <!-- Type Badge + Actions -->
                         <div class="flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-                                :class="getTypeColor(poo.type)">
-                                <component :is="getTypeIcon(poo.type)" class="h-3 w-3" />
-                                {{ poo.type }}
-                            </span>
+                            <BadgeBussines :type="poo.type" />
                             <div class="flex items-center gap-1">
                                 <button @click.stop="openEdit(poo)"
                                     class="rounded-lg p-1.5 text-gray-400 opacity-0 transition hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100">
@@ -250,7 +227,7 @@ const getTypeIcon = (type: string) => {
                                     class="rounded-lg p-1.5 text-gray-400 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100">
                                     <Trash2 class="h-3.5 w-3.5" />
                                 </button>
-                                <ChevronRight
+                                <ChevronRight  @click.stop="openBatches(poo)"
                                     class="h-4 w-4 text-gray-400 transition group-hover:text-teal-500 group-hover:translate-x-0.5" />
                             </div>
                         </div>
@@ -300,8 +277,7 @@ const getTypeIcon = (type: string) => {
                             <Label class="text-sm font-medium ">
                                 Nama <span class="text-red-500">*</span>
                             </Label>
-                            <Input v-model="form.name" placeholder="Rumah Padang"
-                                class="border-gray-200"
+                            <Input v-model="form.name" placeholder="Rumah Padang" class="border-gray-200"
                                 :class="{ 'border-red-400': form.errors.name }" />
                             <span v-if="form.errors.name" class="text-xs text-red-500">{{ form.errors.name }}</span>
                         </div>
@@ -362,7 +338,8 @@ const getTypeIcon = (type: string) => {
                             <DialogTitle class="text-lg font-bold text-gray-900">Hapus POO</DialogTitle>
                         </DialogHeader>
                         <p class="mt-3 text-sm text-gray-500">
-                            Apakah Anda yakin ingin menghapus <span class="font-semibold text-gray-700">{{ deletingPoo?.name }}</span>? Tindakan ini tidak dapat dibatalkan.
+                            Apakah Anda yakin ingin menghapus <span class="font-semibold text-gray-700">{{
+                                deletingPoo?.name }}</span>? Tindakan ini tidak dapat dibatalkan.
                         </p>
                     </div>
 
@@ -370,8 +347,7 @@ const getTypeIcon = (type: string) => {
                         <Button variant="outline" class="w-full text-gray-600 rounded" @click="isDeleteOpen = false">
                             Batal
                         </Button>
-                        <Button @click="handleDelete"
-                            class="w-full bg-red-500 hover:bg-red-600 text-white rounded">
+                        <Button @click="handleDelete" class="w-full bg-red-500 hover:bg-red-600 text-white rounded">
                             Hapus
                         </Button>
                     </div>

@@ -35,12 +35,12 @@ import IconProfil from '@/components/icons/menu/iconProfile.vue';
 
 const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: dashboard(), icon: IconDashboard },
-    { title: 'Pengambilan dari POO', href: '/admin/pengambilan-poo', icon: IconPengambilan },
-    { title: 'Transfer UCO', href: '/admin/transfer', icon: IconTransfer },
-    { title: 'Penjualan / Export', href: '/admin/penjualan', icon: IconPenjualan },
-    { title: 'Riwayat Transaksi', href: '/admin/riwayat', icon: IconRiwayat },
-    { title: 'Manajemen POO', href: '/admin/manajemen-poo', icon: IconManajemen },
-    { title: 'Profil Akun', href: '/admin/profil', icon: IconProfil },
+    { title: 'Pengambilan dari POO', href: '/poos', icon: IconPengambilan },
+    { title: 'Transfer UCO', href: '/transfer', icon: IconTransfer },
+    { title: 'Penjualan / Export', href: '/penjualan', icon: IconPenjualan },
+    { title: 'Riwayat Transaksi', href: '/riwayat', icon: IconRiwayat },
+    { title: 'Manajemen POO', href: '/manajemen-poo', icon: IconManajemen },
+    { title: 'Profil Akun', href: '/profil', icon: IconProfil },
 ];
 </script>
 

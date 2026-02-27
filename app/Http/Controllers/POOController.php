@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
-class PengambilanPOOController extends Controller
+class POOController extends Controller
 {
     public function index()
     {
