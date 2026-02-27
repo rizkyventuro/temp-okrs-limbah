@@ -45,8 +45,6 @@ class UCOBatchController extends Controller
 
             $batch = UcoBatch::create([
                 'poo_id' => $request->poo_id,
-                'collector_id' => Auth::id(),
-                'current_owner_id' => Auth::id(),
                 'batch_code' => $batchCode,
                 'volume' => $request->volume,
                 'collection_date' => $request->collection_date,

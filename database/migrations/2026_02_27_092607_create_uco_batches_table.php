@@ -22,10 +22,7 @@ return new class extends Migration
         Schema::create('uco_batches', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            // Foreign key ke poos (UUID) dan users (bigInteger)
             $table->foreignUuid('poo_id')->constrained('poos')->onDelete('cascade');
-            $table->unsignedBigInteger('collector_id');       // Pengumpul pertama (tidak berubah)
-            $table->unsignedBigInteger('current_owner_id');   // Pemilik saat ini (bisa berubah via transfer)
 
             $table->string('batch_code')->unique();           // UCO-2026-0666
             $table->decimal('volume', 10, 2);                 // Volume (Liter)
@@ -43,10 +40,6 @@ return new class extends Migration
 
             $table->timestamps();
             $table->softDeletes();
-
-            // Foreign key constraints untuk users (bigInteger)
-            $table->foreign('collector_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('current_owner_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -55,12 +48,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('uco_batches', function (Blueprint $table) {
-            $table->dropForeign(['poo_id']);
-            $table->dropForeign(['collector_id']);
-            $table->dropForeign(['current_owner_id']);
-        });
-
         Schema::dropIfExists('uco_batches');
     }
 };

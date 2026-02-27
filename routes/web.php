@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\POOController;
 use App\Http\Controllers\StationController;
 use App\Http\Controllers\UCOBatchController;
+use App\Http\Controllers\UCOTransferController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -37,18 +38,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-    // // =====================
-    // // Transfer UCO
-    // // =====================
-    // Route::prefix('transfers')->name('transfers.')->group(function () {
-    //     Route::get('/', [UCOTransferController::class, 'index'])->name('index');          // List transfer (sent & received)
-    //     Route::post('/', [UCOTransferController::class, 'store'])->name('store');         // Kirim UCO (generate QR transfer)
-    //     Route::get('/{transfer}', [UCOTransferController::class, 'show'])->name('show');  // Detail transfer
-
-    //     // Aksi penerima
-    //     Route::post('/claim', [UCOTransferController::class, 'claim'])->name('claim');            // Terima via scan QR / kode manual
-    //     Route::delete('/{transfer}/cancel', [UCOTransferController::class, 'cancel'])->name('cancel'); // Batalkan transfer (hanya pengirim, status pending)
-    // });
+    // =====================
+    // Transfer UCO
+    // =====================
+    Route::prefix('transfers')->name('transfers.')->group(function () {
+        Route::get('/', [UCOTransferController::class, 'index'])->name('index');           // List batch siap transfer
+        Route::get('/create', [UCOTransferController::class, 'create'])->name('create');   // Form kirim UCO
+        Route::post('/', [UCOTransferController::class, 'store'])->name('store');          // Simpan transfer
+        Route::get('/{transfer}', [UCOTransferController::class, 'show'])->name('show');   // Halaman berhasil + QR
+    });
 
     // // =====================
     // // Penjualan / Final Export

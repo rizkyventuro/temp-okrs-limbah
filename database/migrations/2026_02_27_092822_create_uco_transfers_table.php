@@ -17,40 +17,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::create('uco_transfers', function (Blueprint $table) {
-        //     $table->uuid('id')->primary();
+        Schema::create('uco_transfers', function (Blueprint $table) {
+            $table->uuid('id')->primary();
 
-        //     $table->foreignUuid('uco_batch_id')
-        //         ->constrained('uco_batches')
-        //         ->onDelete('cascade');
+            $table->foreignUuid('uco_batch_id')
+                ->constrained('uco_batches')
+                ->onDelete('cascade');
 
-        //     // Pengirim
-        //     $table->foreignUuid('sender_id')
-        //         ->constrained('users')
-        //         ->onDelete('cascade');
+            $table->string('receiver_name');                  // Nama penerima
+            $table->string('receiver_company')->nullable();   // Perusahaan / Usaha penerima
 
-        //     // Penerima (nullable: bisa belum terdaftar di sistem saat transfer dibuat)
-        //     $table->foreignUuid('receiver_id')
-        //         ->nullable()
-        //         ->constrained('users')
-        //         ->onDelete('set null');
+            $table->string('transfer_code')->unique();        // Kode transfer (TRF-2026-0001)
+            $table->string('transfer_qr_code')->nullable();   // Path QR khusus transfer
+            $table->tinyInteger('status')->default(1);        // Lihat keterangan di atas
+            $table->timestamp('claimed_at')->nullable();      // Waktu penerima klaim
 
-        //     $table->string('receiver_name');                  // Nama pengepul penerima
-        //     $table->string('receiver_company')->nullable();   // Perusahaan / Usaha penerima
-
-        //     $table->string('transfer_qr_code')->nullable();   // Path QR khusus transfer
-        //     $table->tinyInteger('status')->default(1);        // Lihat keterangan di atas
-        //     $table->timestamp('claimed_at')->nullable();      // Waktu penerima klaim
-
-        //     $table->timestamps();
-        //     $table->softDeletes();
-        // });
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        // Schema::dropIfExists('uco_transfers');
+        Schema::dropIfExists('uco_transfers');
     }
 };

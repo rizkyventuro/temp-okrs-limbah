@@ -16,8 +16,6 @@ class UcoBatch extends Model
 
     protected $fillable = [
         'poo_id',
-        'collector_id',
-        'current_owner_id',
         'batch_code',
         'volume',
         'collection_date',
@@ -88,13 +86,8 @@ class UcoBatch extends Model
         return $this->belongsTo(Poo::class);
     }
 
-    public function collector()
+    public function transfers()
     {
-        return $this->belongsTo(\App\Models\User::class, 'collector_id');
-    }
-
-    public function currentOwner()
-    {
-        return $this->belongsTo(\App\Models\User::class, 'current_owner_id');
+        return $this->hasMany(UcoTransfer::class, 'uco_batch_id');
     }
 }

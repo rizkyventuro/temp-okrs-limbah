@@ -36,7 +36,7 @@ import IconProfil from '@/components/icons/menu/iconProfile.vue';
 const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: dashboard(), icon: IconDashboard },
     { title: 'Pengambilan dari POO', href: '/poos', icon: IconPengambilan },
-    { title: 'Transfer UCO', href: '/transfer', icon: IconTransfer },
+    { title: 'Transfer UCO', href: '/transfers', icon: IconTransfer },
     { title: 'Penjualan / Export', href: '/penjualan', icon: IconPenjualan },
     { title: 'Riwayat Transaksi', href: '/riwayat', icon: IconRiwayat },
     { title: 'Manajemen POO', href: '/manajemen-poo', icon: IconManajemen },

@@ -112,7 +112,7 @@ const pengambilanBaru = () => {
                             Pengambilan Baru
                         </Button>
                         <Button variant="outline" @click="downloadQR"
-                            class="w-full text-gray-700 font-medium rounded border-gray-200 hover:border-teal-400 hover:text-teal-600 transition">
+                            class="w-full text-gray-700 font-medium rounded border-gray-200 hover:border-primary hover:text-primary transition"">
                             <Download class="mr-1.5 h-4 w-4" />
                             Download QR
                         </Button>
