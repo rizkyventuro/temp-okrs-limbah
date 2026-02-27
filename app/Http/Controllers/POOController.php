@@ -22,7 +22,7 @@ class POOController extends Controller
                 'total_collected' => $poo->total_collected,
             ]);
 
-        return Inertia::render('admin/PengambilanPOO', [
+        return Inertia::render('admin/poos/PengambilanPOO', [
             'poos' => $poos,
         ]);
     }

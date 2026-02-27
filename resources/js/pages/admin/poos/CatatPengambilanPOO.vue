@@ -62,7 +62,7 @@ const triggerUpload = () => {
 };
 
 const handleSubmit = () => {
-    form.post('/batches', {
+    form.post('/poos/batches', {
         onError: () => {
             toast.error('Gagal!', { description: 'Terjadi kesalahan saat menyimpan data' });
         },
@@ -116,7 +116,7 @@ const handleSubmit = () => {
                                 Volume Minyak (Liter) <span class="text-red-500">*</span>
                             </Label>
                             <Input v-model="form.volume" type="number" placeholder="Contoh: 25"
-                                class="border-[#EDEDED] focus:border-primary-hover focus:ring-2 focus:ring-teal-100"
+                                class="border-[#EDEDED] focus:border-primary-hover focus:ring-2 focus:primary-surface"
                                 :class="{ 'border-red-400': form.errors.volume }" />
                             <span v-if="form.errors.volume" class="text-xs text-red-500">{{ form.errors.volume }}</span>
                         </div>
@@ -127,7 +127,7 @@ const handleSubmit = () => {
                                 Tanggal Pengambilan <span class="text-red-500">*</span>
                             </Label>
                             <Input v-model="form.collection_date" type="date"
-                                class="border-[#EDEDED] focus:border-primary-hover focus:ring-2 focus:ring-teal-100"
+                                class="border-[#EDEDED] focus:border-primary-hover focus:ring-2 focus:primary-surface"
                                 :class="{ 'border-red-400': form.errors.collection_date }" />
                             <span v-if="form.errors.collection_date" class="text-xs text-red-500">{{
                                 form.errors.collection_date }}</span>
@@ -139,7 +139,7 @@ const handleSubmit = () => {
                             <input ref="fileInput" type="file" accept="image/*" class="hidden"
                                 @change="handlePhotoChange" />
                             <button @click="triggerUpload" type="button"
-                                class="w-full rounded-xl border-2 border-dashed border-[#D6D6D6] bg-gray-50 py-8 flex flex-col items-center justify-center gap-2 hover:border-teal-300 hover:bg-teal-50 transition cursor-pointer overflow-hidden">
+                                class="w-full rounded-xl border-2 border-dashed border-[#D6D6D6] bg-gray-50 py-8 flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary-surface transition cursor-pointer overflow-hidden">
                                 <template v-if="photoPreview">
                                     <img :src="photoPreview" class="max-h-40 rounded-lg object-contain" />
                                     <span class="text-xs text-gray-400 mt-1">Klik untuk ganti foto</span>
@@ -158,7 +158,7 @@ const handleSubmit = () => {
                         <div class="grid gap-1.5">
                             <Label class="text-sm font-bold ">Catatan</Label>
                             <textarea v-model="form.notes" placeholder="Catatan tambahan (opsional)..." rows="3"
-                                class="w-full rounded-core border border-[#EDEDED] px-3 py-2.5 text-sm placeholder-gray-400 focus:border-primary-hover focus:outline-none focus:ring-2 focus:ring-teal-100" />
+                                class="w-full rounded-core border px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-primary-surface" />
                         </div>
 
                     </div>

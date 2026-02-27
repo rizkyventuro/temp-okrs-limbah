@@ -23,17 +23,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{poo}', [POOController::class, 'show'])->name('show');        // Detail POO
         Route::put('/{poo}', [POOController::class, 'update'])->name('update');    // Edit POO
         Route::delete('/{poo}', [POOController::class, 'destroy'])->name('destroy'); // Hapus POO
+
+        // =====================
+        // Pengambilan UCO (Batch)
+        // =====================
+        Route::prefix('batches')->name('batches.')->group(function () {
+            Route::get('/{poo}/create', [UCOBatchController::class, 'create'])->name('create');            // Form catat pengambilan
+            Route::post('/', [UCOBatchController::class, 'store'])->name('store');                         // Simpan pengambilan
+
+            Route::get('/{batch}/qr', [UCOBatchController::class, 'generateQR'])->name('qr');             // Halaman berhasil + QR
+        });
     });
 
-    // =====================
-    // Pengambilan UCO (Batch)
-    // =====================
-    Route::prefix('batches')->name('batches.')->group(function () {
-        Route::get('/{poo}/create', [UCOBatchController::class, 'create'])->name('create');            // Form catat pengambilan
-        Route::post('/', [UCOBatchController::class, 'store'])->name('store');                         // Simpan pengambilan
 
-        Route::get('/{batch}/qr', [UCOBatchController::class, 'generateQR'])->name('qr');             // Halaman berhasil + QR
-    });
 
     // // =====================
     // // Transfer UCO
@@ -71,7 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //     Route::get('/custody/{batch}', [TransactionController::class, 'custody'])->name('custody'); // Rantai kepemilikan per batch
     // });
 
-    
+
     // Route::get('admin/transfer', [StationController::class, 'index'])->name('admin.transfer');
     // Route::post('admin/transfer', [StationController::class, 'store']);
     // Route::put('admin/transfer/{id}', [StationController::class, 'update']);

@@ -15,7 +15,7 @@ class UCOBatchController extends Controller
     {
         $poo = Poo::findOrFail($pooId);
 
-        return Inertia::render('admin/CatatPengambilanPOO', [
+        return Inertia::render('admin/poos/CatatPengambilanPOO', [
             'poo' => [
                 'id' => $poo->id,
                 'name' => $poo->name,
@@ -63,7 +63,7 @@ class UCOBatchController extends Controller
             return $batch;
         });
 
-        return redirect()->route('batches.qr', $batch->id);
+        return redirect()->route('poos.batches.qr', $batch->id);
     }
 
     public function generateQR($batchId)
@@ -74,7 +74,7 @@ class UCOBatchController extends Controller
         $qrData = urlencode($batch->batch_code);
         $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={$qrData}";
 
-        return Inertia::render('admin/BerhasilPengambilanPOO', [
+        return Inertia::render('admin/poos/BerhasilPengambilanPOO', [
             'batch' => [
                 'id' => $batch->id,
                 'code' => $batch->batch_code,

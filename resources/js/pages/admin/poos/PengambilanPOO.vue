@@ -88,7 +88,7 @@ const openDelete = (poo: POO) => {
 
 
 const openBatches = (poo: POO) => {
-    router.visit(`/batches/${poo.id}/create`);
+    router.visit(`/poos/batches/${poo.id}/create`);
 };
 
 const setType = (type: 'Restoran' | 'UMKM' | 'Rumah Tangga') => {
