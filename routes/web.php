@@ -45,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [UCOTransferController::class, 'index'])->name('index');           // List batch siap transfer
         Route::get('/create', [UCOTransferController::class, 'create'])->name('create');   // Form kirim UCO
         Route::post('/', [UCOTransferController::class, 'store'])->name('store');          // Simpan transfer
+        Route::get('/claim', [UCOTransferController::class, 'claimPage'])->name('claim');  // Halaman terima UCO
+        Route::post('/claim', [UCOTransferController::class, 'claim'])->name('claim.store'); // Proses klaim
         Route::get('/{transfer}', [UCOTransferController::class, 'show'])->name('show');   // Halaman berhasil + QR
     });
 

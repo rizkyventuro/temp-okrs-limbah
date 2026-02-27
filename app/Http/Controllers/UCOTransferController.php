@@ -105,4 +105,61 @@ class UCOTransferController extends Controller
             ],
         ]);
     }
+
+    public function claimPage(Request $request)
+    {
+        $transfer = null;
+
+        if ($request->has('code')) {
+            $found = UcoTransfer::with('batch.poo')
+                ->where('transfer_code', $request->code)
+                ->first();
+
+            if ($found) {
+                $transfer = [
+                    'id' => $found->id,
+                    'transfer_code' => $found->transfer_code,
+                    'batch_code' => $found->batch->batch_code,
+                    'poo_name' => $found->batch->poo->name,
+                    'volume' => (float) $found->batch->volume,
+                    'receiver_name' => $found->receiver_name,
+                    'status' => $found->status_label,
+                    'status_code' => $found->status,
+                ];
+            }
+        }
+
+        return Inertia::render('admin/transfer/TerimaUCO', [
+            'transfer' => $transfer,
+            'searchCode' => $request->code,
+        ]);
+    }
+
+    public function claim(Request $request)
+    {
+        $request->validate([
+            'transfer_code' => 'required|string',
+        ]);
+
+        $transfer = UcoTransfer::with('batch')
+            ->where('transfer_code', $request->transfer_code)
+            ->firstOrFail();
+
+        if ($transfer->status !== UcoTransfer::STATUS_PENDING) {
+            return back()->withErrors(['transfer_code' => 'Transfer ini sudah diklaim atau dibatalkan.']);
+        }
+
+        DB::transaction(function () use ($transfer) {
+            $transfer->update([
+                'status' => UcoTransfer::STATUS_COMPLETED,
+                'claimed_at' => now(),
+            ]);
+
+            $transfer->batch->update([
+                'status' => UcoBatch::STATUS_TRANSFERRED,
+            ]);
+        });
+
+        return redirect()->route('transfers.index');
+    }
 }

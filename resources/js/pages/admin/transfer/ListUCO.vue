@@ -26,6 +26,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 const navigateToKirim = () => {
     router.visit('/transfers/create');
 };
+
+const navigateToTerima = () => {
+    router.visit('/transfers/claim');
+};
 </script>
 
 <template>
@@ -66,20 +70,20 @@ const navigateToKirim = () => {
                         </div>
                     </button>
 
-                    <!-- Terima UCO (coming soon) -->
-                    <div
-                        class="group relative flex flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-6 text-left opacity-60 cursor-not-allowed">
+                    <!-- Terima UCO -->
+                    <button @click="navigateToTerima"
+                        class="group relative flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:border-teal-300 hover:shadow-md cursor-pointer">
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 group-hover:bg-teal-50 group-hover:text-teal-600 transition">
                             <QrCode class="h-5 w-5" />
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold text-gray-500">Terima UCO</h3>
-                            <p class="mt-1 text-sm text-gray-400">
+                            <h3 class="text-base font-semibold text-gray-900">Terima UCO</h3>
+                            <p class="mt-1 text-sm text-gray-500">
                                 Scan QR code dari pengirim untuk menerima kepemilikan batch UCO.
                             </p>
                         </div>
-                    </div>
+                    </button>
                 </div>
 
                 <!-- Batch Siap Transfer -->
