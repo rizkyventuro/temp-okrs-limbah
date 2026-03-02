@@ -60,6 +60,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{batch}/confirmation', [UCOExportController::class, 'confirmation'])->name('confirmation');
         Route::post('/{batch}/generate', [UCOExportController::class, 'generate'])->name('generate');
         Route::get('/{exportId}/success', [UCOExportController::class, 'success'])->name('success');
+
+        Route::get('/{exportId}/iscc-preview', [UCOExportController::class, 'previewIscc'])->name('preview-iscc');
+
+
         Route::get('/{exportId}/download', [UCOExportController::class, 'download'])->name('download');
     });
 

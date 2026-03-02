@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\UcoBatch;
 use App\Models\UcoExport;
 use App\Models\UcoTransfer;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -171,36 +172,54 @@ class UCOExportController extends Controller
                 'volume' => (float) $export->volume,
                 'exported_at' => $export->export_date->toDateString(),
                 'refinery_name' => $export->refinery_name,
-                'iscc_document_url' => $export->iscc_document
-                    ? '/storage/' . $export->iscc_document
-                    : null,
-
-                'iscc' => [
-                    'poo_name' => $export->batch->poo->name,
-                    'poo_street' => $export->batch->poo->address ?? '-',
-                    'poo_city' => '-',
-                    'poo_country' => 'Indonesia',
-                    'poo_phone' => $export->batch->poo->contact ?? '-',
-                    'uco_amount' => number_format((float) $export->volume, 0, ',', '.') . ' Litres',
-                    'recipient' => $export->refinery_name,
-                    'signatory' => $export->batch->poo->name . ' – Manager',
-                    'place_date' => 'Indonesia, ' . $export->export_date->format('d F Y'),
-                ],
+                'iscc' => $this->buildIsccData($export),
             ],
         ]);
     }
 
     /**
-     * Download ISCC document (placeholder)
+     * Preview ISCC document (HTML untuk iframe)
+     */
+    public function previewIscc($id)
+    {
+        $export = UcoExport::with('batch.poo')->findOrFail($id);
+
+        return view('pdf.iscc-document', [
+            'iscc' => $this->buildIsccData($export),
+        ]);
+    }
+
+    /**
+     * Download ISCC document sebagai PDF
      */
     public function download($exportId)
     {
-        $export = UcoExport::findOrFail($exportId);
+        $export = UcoExport::with('batch.poo')->findOrFail($exportId);
 
-        if ($export->iscc_document) {
-            return response()->download(storage_path('app/public/' . $export->iscc_document));
-        }
+        $iscc = $this->buildIsccData($export);
+        $pdf = Pdf::loadView('pdf.iscc-document', ['iscc' => $iscc])
+            ->setPaper('a4', 'portrait');
 
-        return back()->withErrors(['download' => 'Dokumen ISCC belum tersedia.']);
+        $filename = 'ISCC-' . $export->export_code . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Build data ISCC dari export record
+     */
+    private function buildIsccData(UcoExport $export): array
+    {
+        return [
+            'poo_name' => $export->batch->poo->name,
+            'poo_street' => $export->batch->poo->address ?? '-',
+            'poo_city' => '-',
+            'poo_country' => 'Indonesia',
+            'poo_phone' => $export->batch->poo->contact ?? '-',
+            'uco_amount' => number_format((float) $export->volume, 0, ',', '.') . ' Litres',
+            'recipient' => $export->refinery_name,
+            'signatory' => $export->batch->poo->name . ' – Manager',
+            'place_date' => 'Indonesia, ' . $export->export_date->format('d F Y'),
+        ];
     }
 }
