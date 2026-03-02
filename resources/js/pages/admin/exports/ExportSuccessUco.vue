@@ -78,7 +78,7 @@ const selesai = () => {
                     </div>
 
                     <!-- ISCC Document Preview -->
-                    <div class="w-full h-[900px] overflow-hidden">
+                    <div class="w-full h-[1000px] overflow-hidden">
                         <iframe :src="`/exports/${props.export.id}/iscc-preview`" class="w-full h-full bg-white border-0" />
                     </div>
 

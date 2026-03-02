@@ -198,11 +198,22 @@ class UCOExportController extends Controller
 
         $iscc = $this->buildIsccData($export);
         $pdf = Pdf::loadView('pdf.iscc-document', ['iscc' => $iscc])
-            ->setPaper('a4', 'portrait');
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'defaultFont' => 'DejaVu Serif',
+                'dpi' => 96,
+                'margin_top' => 10,
+                'margin_bottom' => 10,
+                'margin_left' => 10,
+                'margin_right' => 10,
+            ]);
 
         $filename = 'ISCC-' . $export->export_code . '.pdf';
 
-        return $pdf->download($filename);
+        // return $pdf->download($filename);
+
+        return $pdf->stream($filename);
     }
 
     /**
