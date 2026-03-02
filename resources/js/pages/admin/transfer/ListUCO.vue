@@ -57,9 +57,9 @@ const navigateToTerima = () => {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Kirim UCO -->
                     <button @click="navigateToKirim"
-                        class="group relative flex flex-col gap-3 rounded-2xl border-2 border-primary bg-white p-6 text-left shadow-sm transition hover:bg-primary-surface hover:shadow-md cursor-pointer">
+                        class="group relative flex flex-col gap-3 rounded-2xl bg-white p-6 text-left shadow-sm transition hover:border-2 hover:border-primary  hover:bg-primary-surface hover:shadow-md cursor-pointer">
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-primary group-hover:bg-teal-100 transition">
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-surface text-primary group-hover:bg-teal-100 transition">
                             <Send class="h-5 w-5" />
                         </div>
                         <div>
@@ -72,9 +72,9 @@ const navigateToTerima = () => {
 
                     <!-- Terima UCO -->
                     <button @click="navigateToTerima"
-                        class="group relative flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:border-teal-300 hover:shadow-md cursor-pointer">
+                        class="group relative flex flex-col gap-3 rounded-2xl border bg-white p-6 text-left shadow-sm transition hover:border-2 hover:border-primary hover:shadow-md cursor-pointer">
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 group-hover:bg-teal-50 group-hover:text-teal-600 transition">
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-surface text-primary group-hover:bg-teal-100 transition">
                             <QrCode class="h-5 w-5" />
                         </div>
                         <div>
@@ -91,41 +91,56 @@ const navigateToTerima = () => {
                     <div class="px-5 py-4 border-b border-gray-100">
                         <h2 class="text-sm font-semibold text-gray-700">
                             Batch Siap Transfer
-                            <span
-                                class="ml-1.5 inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
-                                {{ props.batches?.length ?? 0 }}
-                            </span>
+                            (
+                            {{ props.batches?.length ?? 0 }}
+                            )
                         </h2>
                     </div>
 
-                    <div class="divide-y divide-gray-100">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 px-5 py-4">
+
                         <template v-if="props.batches && props.batches.length > 0">
                             <div v-for="batch in props.batches" :key="batch.id"
-                                class="group flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition"
+                                class="group flex items-center justify-between px-5 py-4 cursor-pointer bg-[#F5F7FA] hover:bg-white transition border border-gray-100 rounded-lg"
                                 @click="navigateToKirim">
+
                                 <div class="flex flex-col gap-0.5">
-                                    <span class="text-sm font-semibold text-teal-600">{{ batch.code }}</span>
-                                    <span class="text-xs text-gray-500">{{ batch.poo_name }} • {{ batch.volume }}
-                                        L</span>
+                                    <span class="text-sm font-semibold text-teal-600">
+                                        {{ batch.code }}
+                                    </span>
+
+                                    <span class="text-xs text-gray-500">
+                                        {{ batch.poo_name }} • {{ batch.volume }} L
+                                    </span>
                                 </div>
+
                                 <div class="flex items-center gap-3">
                                     <span
                                         class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
                                         ● Aktif
                                     </span>
+
                                     <ChevronRight class="h-4 w-4 text-gray-300 group-hover:text-teal-500 transition" />
                                 </div>
+
                             </div>
                         </template>
 
                         <!-- Empty state -->
-                        <div v-else class="flex flex-col items-center justify-center py-12 text-center">
+                        <div v-else class="col-span-full flex flex-col items-center justify-center py-12 text-center">
                             <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
                                 <ArrowRightLeft class="h-4 w-4 text-gray-400" />
                             </div>
-                            <p class="text-sm font-medium text-gray-600">Tidak ada batch siap transfer</p>
-                            <p class="mt-1 text-xs text-gray-400">Batch akan muncul di sini setelah dicatat</p>
+
+                            <p class="text-sm font-medium text-gray-600">
+                                Tidak ada batch siap transfer
+                            </p>
+
+                            <p class="mt-1 text-xs text-gray-400">
+                                Batch akan muncul di sini setelah dicatat
+                            </p>
                         </div>
+
                     </div>
                 </div>
 

@@ -37,7 +37,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: dashboard(), icon: IconDashboard },
     { title: 'Pengambilan dari POO', href: '/poos', icon: IconPengambilan },
     { title: 'Transfer UCO', href: '/transfers', icon: IconTransfer },
-    { title: 'Penjualan / Export', href: '/penjualan', icon: IconPenjualan },
+    { title: 'Penjualan / Export', href: '/exports', icon: IconPenjualan },
     { title: 'Riwayat Transaksi', href: '/riwayat', icon: IconRiwayat },
     { title: 'Manajemen POO', href: '/manajemen-poo', icon: IconManajemen },
     { title: 'Profil Akun', href: '/profil', icon: IconProfil },

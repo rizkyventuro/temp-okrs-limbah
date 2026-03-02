@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\POOController;
 use App\Http\Controllers\StationController;
 use App\Http\Controllers\UCOBatchController;
+use App\Http\Controllers\UCOExportController;
 use App\Http\Controllers\UCOTransferController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -53,17 +54,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // // =====================
     // // Penjualan / Final Export
     // // =====================
-    // Route::prefix('exports')->name('exports.')->group(function () {
-    //     Route::get('/', [UCOExportController::class, 'index'])->name('index');           // List semua export
-    //     Route::post('/', [UCOExportController::class, 'store'])->name('store');          // Buat draft export
-    //     Route::get('/{export}', [UCOExportController::class, 'show'])->name('show');     // Detail export + rantai kepemilikan
+    Route::prefix('exports')->name('exports.')->group(function () {
+        Route::get('/', [UCOExportController::class, 'index'])->name('index');
 
-    //     // Konfirmasi final (LOCKED setelah ini)
-    //     Route::post('/{export}/confirm', [UCOExportController::class, 'confirm'])->name('confirm');
-
-    //     // Dokumen ISCC
-    //     Route::get('/{export}/iscc', [UCOExportController::class, 'downloadISCC'])->name('iscc.download');
-    // });
+        Route::get('/{batch}/confirmation', [UCOExportController::class, 'confirmation'])->name('confirmation');
+        Route::post('/{batch}/generate', [UCOExportController::class, 'generate'])->name('generate');
+        Route::get('/{exportId}/success', [UCOExportController::class, 'success'])->name('success');
+        Route::get('/{exportId}/download', [UCOExportController::class, 'download'])->name('download');
+    });
 
     // // =====================
     // // Riwayat Transaksi

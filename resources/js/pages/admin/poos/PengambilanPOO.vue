@@ -13,7 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { MapPin, Search, ChevronRight, UtensilsCrossed, Home, Store, Pencil, Trash2 } from 'lucide-vue-next';
+import { MapPin, Search, ChevronRight, Pencil, Trash2 } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 
 interface POO {

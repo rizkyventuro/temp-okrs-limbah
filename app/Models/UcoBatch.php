@@ -90,4 +90,9 @@ class UcoBatch extends Model
     {
         return $this->hasMany(UcoTransfer::class, 'uco_batch_id');
     }
+
+    public function exports()
+    {
+        return $this->hasMany(UcoExport::class, 'uco_batch_id');
+    }
 }
