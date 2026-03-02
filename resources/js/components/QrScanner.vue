@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import { Camera, X, ZoomIn } from 'lucide-vue-next';
 
 const props = defineProps<{
@@ -17,23 +17,26 @@ const overlayCanvasRef = ref<HTMLCanvasElement | null>(null);
 const stream = ref<MediaStream | null>(null);
 const scanning = ref(false);
 const zoomLevel = ref(1);
-const detectedCode = ref('');
 const scanStatus = ref<'idle' | 'scanning' | 'found'>('idle');
 const errorMsg = ref('');
+const errorDetail = ref('');
 const animationId = ref<number | null>(null);
 
-// jsQR will be loaded dynamically
+// jsQR loaded via CDN fallback
 let jsQR: any = null;
+
+// Zoom state for canvas-based crop zoom
+const targetZoom = ref(1);
+const currentZoom = ref(1);
+const zoomCenterX = ref(0.5);
+const zoomCenterY = ref(0.5);
 
 const loadJsQR = async () => {
     if (jsQR) return jsQR;
     return new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js';
-        script.onload = () => {
-            jsQR = (window as any).jsQR;
-            resolve(jsQR);
-        };
+        script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+        script.onload = () => { jsQR = (window as any).jsQR; resolve(jsQR); };
         script.onerror = reject;
         document.head.appendChild(script);
     });
@@ -41,31 +44,47 @@ const loadJsQR = async () => {
 
 const startCamera = async () => {
     errorMsg.value = '';
+    errorDetail.value = '';
     try {
         await loadJsQR();
 
-        const constraints: MediaStreamConstraints = {
-            video: {
-                facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-            },
-        };
+        let mediaStream: MediaStream | null = null;
 
-        stream.value = await navigator.mediaDevices.getUserMedia(constraints);
+        const constraintsList = [
+            { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } },
+            { video: { facingMode: 'environment' } },
+            { video: true },
+        ];
+
+        for (const constraints of constraintsList) {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                break;
+            } catch (e: any) {
+                console.warn('[QRScanner] Constraint failed:', e?.name);
+            }
+        }
+
+        if (!mediaStream) throw new Error('All camera constraints failed');
+
+        stream.value = mediaStream;
 
         if (videoRef.value) {
             videoRef.value.srcObject = stream.value;
             await videoRef.value.play();
             scanning.value = true;
             scanStatus.value = 'scanning';
-            requestAnimationFrame(scanFrame);
+            animationId.value = requestAnimationFrame(scanFrame);
         }
     } catch (err: any) {
+        console.error('[QRScanner] Fatal error:', err);
+        errorDetail.value = `${err?.name}: ${err?.message}`;
         if (err.name === 'NotAllowedError') {
             errorMsg.value = 'Akses kamera ditolak. Mohon izinkan akses kamera di pengaturan browser.';
         } else if (err.name === 'NotFoundError') {
             errorMsg.value = 'Kamera tidak ditemukan pada perangkat ini.';
+        } else if (err.name === 'NotReadableError') {
+            errorMsg.value = 'Kamera sedang digunakan aplikasi lain.';
         } else {
             errorMsg.value = 'Gagal membuka kamera. Coba refresh halaman.';
         }
@@ -82,38 +101,15 @@ const stopCamera = () => {
         stream.value = null;
     }
     scanning.value = false;
-    zoomLevel.value = 1;
     scanStatus.value = 'idle';
-    detectedCode.value = '';
+    targetZoom.value = 1;
+    currentZoom.value = 1;
+    zoomCenterX.value = 0.5;
+    zoomCenterY.value = 0.5;
+    zoomLevel.value = 1;
 };
 
-// Auto-zoom: analyze QR bounding box size relative to frame
-const computeZoom = (location: any, videoWidth: number, videoHeight: number): number => {
-    if (!location) return 1;
-
-    const pts = [
-        location.topLeftCorner,
-        location.topRightCorner,
-        location.bottomRightCorner,
-        location.bottomLeftCorner,
-    ];
-
-    const xs = pts.map((p: any) => p.x);
-    const ys = pts.map((p: any) => p.y);
-    const qrW = Math.max(...xs) - Math.min(...xs);
-    const qrH = Math.max(...ys) - Math.min(...ys);
-
-    // Target: QR should occupy ~50% of the shorter dimension
-    const targetFraction = 0.5;
-    const frameShorter = Math.min(videoWidth, videoHeight);
-    const qrAvg = (qrW + qrH) / 2;
-
-    const desired = (targetFraction * frameShorter) / qrAvg;
-    // Clamp between 1x and 4x
-    return Math.min(Math.max(desired, 1), 4);
-};
-
-const drawOverlay = (location: any | null) => {
+const drawOverlay = (location: any | null, scaleX: number, scaleY: number, offsetX: number, offsetY: number) => {
     const canvas = overlayCanvasRef.value;
     const video = videoRef.value;
     if (!canvas || !video) return;
@@ -123,11 +119,7 @@ const drawOverlay = (location: any | null) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     if (!location) return;
-
-    const scaleX = canvas.width / video.videoWidth;
-    const scaleY = canvas.height / video.videoHeight;
 
     const pts = [
         location.topLeftCorner,
@@ -136,9 +128,22 @@ const drawOverlay = (location: any | null) => {
         location.bottomLeftCorner,
     ];
 
+    // Convert from cropped-canvas coords back to display coords
+    const displayW = canvas.width;
+    const displayH = canvas.height;
+    const vw = video.videoWidth || displayW;
+    const vh = video.videoHeight || displayH;
+
+    const toDisplay = (p: any) => ({
+        x: ((p.x / scaleX + offsetX) / vw) * displayW,
+        y: ((p.y / scaleY + offsetY) / vh) * displayH,
+    });
+
+    const displayPts = pts.map(toDisplay);
+
     ctx.beginPath();
-    ctx.moveTo(pts[0].x * scaleX, pts[0].y * scaleY);
-    pts.slice(1).forEach((p: any) => ctx.lineTo(p.x * scaleX, p.y * scaleY));
+    ctx.moveTo(displayPts[0].x, displayPts[0].y);
+    displayPts.slice(1).forEach((p) => ctx.lineTo(p.x, p.y));
     ctx.closePath();
     ctx.strokeStyle = '#00BFA5';
     ctx.lineWidth = 3;
@@ -152,40 +157,86 @@ const scanFrame = () => {
     const canvas = canvasRef.value;
     if (!video || !canvas || !scanning.value) return;
 
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+    if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+        const vw = video.videoWidth;
+        const vh = video.videoHeight;
+
+        if (vw === 0 || vh === 0) {
+            animationId.value = requestAnimationFrame(scanFrame);
+            return;
+        }
+
+        // Smooth zoom interpolation
+        currentZoom.value += (targetZoom.value - currentZoom.value) * 0.08;
+        if (Math.abs(currentZoom.value - targetZoom.value) < 0.01) {
+            currentZoom.value = targetZoom.value;
+        }
+        zoomLevel.value = currentZoom.value;
+
+        const zoom = currentZoom.value;
+
+        // Calculate crop region
+        const cropW = vw / zoom;
+        const cropH = vh / zoom;
+        const cropX = Math.max(0, Math.min(vw - cropW, zoomCenterX.value * vw - cropW / 2));
+        const cropY = Math.max(0, Math.min(vh - cropH, zoomCenterY.value * vh - cropH / 2));
+
+        // Process at capped resolution for performance
+        const processW = Math.min(640, vw);
+        const processH = Math.round(processW * (cropH / cropW));
+        canvas.width = processW;
+        canvas.height = processH;
+
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        if (ctx) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        if (!ctx) {
+            animationId.value = requestAnimationFrame(scanFrame);
+            return;
+        }
 
-            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: 'dontInvert',
-            });
+        // Draw cropped & scaled frame
+        ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, processW, processH);
+        const imageData = ctx.getImageData(0, 0, processW, processH);
 
-            if (code) {
-                scanStatus.value = 'found';
-                detectedCode.value = code.data;
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'attemptBoth',
+        });
 
-                // Auto zoom
-                const newZoom = computeZoom(code.location, canvas.width, canvas.height);
-                zoomLevel.value = newZoom;
+        if (code) {
+            scanStatus.value = 'found';
 
-                drawOverlay(code.location);
+            const pts = [code.location.topLeftCorner, code.location.topRightCorner,
+                         code.location.bottomRightCorner, code.location.bottomLeftCorner];
+            const xs = pts.map((p: any) => p.x);
+            const ys = pts.map((p: any) => p.y);
+            const qrW = Math.max(...xs) - Math.min(...xs);
+            const qrH = Math.max(...ys) - Math.min(...ys);
+            const qrCx = (Math.min(...xs) + Math.max(...xs)) / 2 / processW;
+            const qrCy = (Math.min(...ys) + Math.max(...ys)) / 2 / processH;
 
-                // Emit after short delay so user sees the highlight
-                setTimeout(() => {
-                    emit('detected', code.data);
-                    stopCamera();
-                }, 800);
-                return;
-            } else {
-                drawOverlay(null);
-                // Slowly return zoom to 1 if no QR found
-                if (zoomLevel.value > 1) {
-                    zoomLevel.value = Math.max(1, zoomLevel.value - 0.05);
-                }
+            // Map QR center back to full video coordinates (normalized)
+            zoomCenterX.value = cropX / vw + qrCx * (cropW / vw);
+            zoomCenterY.value = cropY / vh + qrCy * (cropH / vh);
+
+            // Target zoom so QR fills ~55% of frame
+            const qrFraction = (qrW / processW + qrH / processH) / 2;
+            const desiredZoom = Math.min(Math.max(zoom * (0.55 / qrFraction), 1), 5);
+            targetZoom.value = desiredZoom;
+
+            const scaleX = processW / cropW;
+            const scaleY = processH / cropH;
+            drawOverlay(code.location, scaleX, scaleY, cropX, cropY);
+
+            setTimeout(() => {
+                emit('detected', code.data);
+                stopCamera();
+            }, 700);
+            return;
+        } else {
+            drawOverlay(null, 1, 1, 0, 0);
+
+            // Slowly return to zoom 1 when no QR detected
+            if (targetZoom.value > 1) {
+                targetZoom.value = Math.max(1, targetZoom.value - 0.02);
             }
         }
     }
@@ -196,17 +247,12 @@ const scanFrame = () => {
 watch(
     () => props.isOpen,
     (val) => {
-        if (val) {
-            startCamera();
-        } else {
-            stopCamera();
-        }
+        if (val) startCamera();
+        else stopCamera();
     },
 );
 
-onUnmounted(() => {
-    stopCamera();
-});
+onUnmounted(() => stopCamera());
 </script>
 
 <template>
@@ -215,10 +261,10 @@ onUnmounted(() => {
         <!-- Viewport -->
         <div class="relative w-full overflow-hidden rounded-2xl bg-black" style="aspect-ratio: 4/3">
 
-            <!-- Video -->
+            <!-- Video: NO CSS transform zoom — zoom is handled by canvas crop -->
             <video ref="videoRef"
-                class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out origin-center"
-                :style="{ transform: `scale(${zoomLevel})` }" muted playsinline autoplay />
+                class="absolute inset-0 w-full h-full object-cover"
+                muted playsinline autoplay />
 
             <!-- Hidden canvas for jsQR processing -->
             <canvas ref="canvasRef" class="hidden" />
@@ -229,46 +275,45 @@ onUnmounted(() => {
             <!-- Scan frame guide -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div class="relative h-52 w-52">
-                    <!-- Corners -->
-                    <span class="absolute top-0 left-0 h-8 w-8 border-t-4 border-l-4 rounded-tl-lg"
+                    <span class="absolute top-0 left-0 h-8 w-8 border-t-4 border-l-4 rounded-tl-lg transition-colors duration-300"
                         :class="scanStatus === 'found' ? 'border-green-400' : 'border-white'" />
-                    <span class="absolute top-0 right-0 h-8 w-8 border-t-4 border-r-4 rounded-tr-lg"
+                    <span class="absolute top-0 right-0 h-8 w-8 border-t-4 border-r-4 rounded-tr-lg transition-colors duration-300"
                         :class="scanStatus === 'found' ? 'border-green-400' : 'border-white'" />
-                    <span class="absolute bottom-0 left-0 h-8 w-8 border-b-4 border-l-4 rounded-bl-lg"
+                    <span class="absolute bottom-0 left-0 h-8 w-8 border-b-4 border-l-4 rounded-bl-lg transition-colors duration-300"
                         :class="scanStatus === 'found' ? 'border-green-400' : 'border-white'" />
-                    <span class="absolute bottom-0 right-0 h-8 w-8 border-b-4 border-r-4 rounded-br-lg"
+                    <span class="absolute bottom-0 right-0 h-8 w-8 border-b-4 border-r-4 rounded-br-lg transition-colors duration-300"
                         :class="scanStatus === 'found' ? 'border-green-400' : 'border-white'" />
 
-                    <!-- Scan line animation -->
                     <div v-if="scanStatus === 'scanning'"
                         class="absolute left-2 right-2 h-0.5 bg-teal-400 opacity-80 rounded scan-line" />
                 </div>
             </div>
 
             <!-- Zoom indicator -->
-            <div v-if="zoomLevel > 1.05"
+            <div v-if="zoomLevel > 1.1"
                 class="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-xs text-white backdrop-blur">
                 <ZoomIn class="h-3 w-3" />
                 {{ zoomLevel.toFixed(1) }}x
             </div>
 
             <!-- Status label -->
-            <div class="absolute bottom-3 left-1/2 -translate-x-1/2">
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
                 <span v-if="scanStatus === 'scanning'"
                     class="rounded-full bg-black/50 px-3 py-1 text-xs text-white backdrop-blur">
                     Arahkan ke QR Code batch UCO
                 </span>
                 <span v-else-if="scanStatus === 'found'"
                     class="rounded-full bg-green-500/80 px-3 py-1 text-xs text-white backdrop-blur font-semibold">
-                    QR Terdeteksi!
+                    ✓ QR Terdeteksi!
                 </span>
             </div>
 
             <!-- Error state -->
             <div v-if="errorMsg"
-                class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-center px-6">
-                <Camera class="h-10 w-10 text-gray-500 mb-3" />
+                class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-center px-6 gap-3">
+                <Camera class="h-10 w-10 text-gray-500" />
                 <p class="text-sm text-gray-300">{{ errorMsg }}</p>
+                <p v-if="errorDetail" class="text-xs text-red-400 font-mono break-all">{{ errorDetail }}</p>
             </div>
         </div>
 
@@ -283,21 +328,10 @@ onUnmounted(() => {
 
 <style scoped>
 @keyframes scan {
-    0% {
-        top: 8px;
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.6;
-    }
-
-    100% {
-        top: calc(100% - 8px);
-        opacity: 1;
-    }
+    0% { top: 8px; opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { top: calc(100% - 8px); opacity: 1; }
 }
-
 .scan-line {
     animation: scan 2s ease-in-out infinite alternate;
 }
